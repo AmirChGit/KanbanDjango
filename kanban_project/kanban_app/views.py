@@ -54,12 +54,9 @@ class ColumnListCreateView(generics.ListCreateAPIView):
     queryset = Column.objects.all()
     serializer_class = ColumnSerializer
 
-    def create(self, request, *args, **kwargs):
-        print("Request Data:", request.data)  # Debug: Print the incoming request data
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def get_queryset(self):
+        user = self.request.user
+        return Column.objects.filter(board__user=user)
 
 
 # View to retrieve, update, and delete a column
@@ -75,16 +72,12 @@ class TaskListCreateView(generics.ListCreateAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
 
-    def get(self, request, *args, **kwargs):
-        print("User:", request.user)
-        return super().get(request, *args, **kwargs)
+    def get_queryset(self):
+        user = self.request.user
+        return Task.objects.filter(column__board__user=user)
 
-    def create(self, request, *args, **kwargs):
-        print("Request Data:", request.data)  # Debug: Print the incoming request data
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def perform_create(self, serializer):
+        serializer.save()
 
 
 # View to retrieve, update, and delete a task

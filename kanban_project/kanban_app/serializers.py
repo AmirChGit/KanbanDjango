@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Board, Column, Task, FirebaseUser
 
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -52,48 +53,21 @@ class BoardSerializer(serializers.ModelSerializer):
 
 
 class ColumnSerializer(serializers.ModelSerializer):
-    user = serializers.SlugRelatedField(
-        slug_field="username", queryset=User.objects.all()
-    )
-
     class Meta:
         model = Column
-        fields = ["id", "name", "board", "user"]
+        fields = ["id", "name", "board"]
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation["user"] = instance.user.username  # Convert User instance to UID
-        return representation
-
-    def to_internal_value(self, data):
-        internal_value = super().to_internal_value(data)
-        try:
-            user = User.objects.get(username=data.get("user"))
-            internal_value["user"] = user
-        except User.DoesNotExist:
-            raise serializers.ValidationError("User with UID not found.")
-        return internal_value
+    def create(self, validated_data):
+        column = Column.objects.create(**validated_data)
+        return column
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    user = serializers.SlugRelatedField(
-        slug_field="username", queryset=User.objects.all()
-    )
+    column = serializers.PrimaryKeyRelatedField(queryset=Column.objects.all())
 
     class Meta:
         model = Task
-        fields = ["id", "title", "description", "status", "column", "user"]
+        fields = ["id", "title", "description", "status", "column"]
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation["user"] = instance.user.username  # Convert User instance to UID
-        return representation
-
-    def to_internal_value(self, data):
-        internal_value = super().to_internal_value(data)
-        try:
-            user = User.objects.get(username=data.get("user"))
-            internal_value["user"] = user
-        except User.DoesNotExist:
-            raise serializers.ValidationError("User with UID not found.")
-        return internal_value
+    def create(self, validated_data):
+        return Task.objects.create(**validated_data)
