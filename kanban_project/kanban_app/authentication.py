@@ -21,6 +21,7 @@ if not firebase_admin._apps:
 class FirebaseAuthentication(BaseAuthentication):
     def authenticate(self, request):
         auth_header = request.headers.get("Authorization")
+        print("Auth Header Received:", auth_header)  # Debug print
         if not auth_header:
             return None
 

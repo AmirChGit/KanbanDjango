@@ -49,6 +49,8 @@ class BoardDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 # View to create and list columns
 class ColumnListCreateView(generics.ListCreateAPIView):
+    authentication_classes = [FirebaseAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = Column.objects.all()
     serializer_class = ColumnSerializer
 
@@ -68,8 +70,14 @@ class ColumnDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 # View to create and list tasks
 class TaskListCreateView(generics.ListCreateAPIView):
+    authentication_classes = [FirebaseAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+
+    def get(self, request, *args, **kwargs):
+        print("User:", request.user)
+        return super().get(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
         print("Request Data:", request.data)  # Debug: Print the incoming request data
@@ -81,6 +89,8 @@ class TaskListCreateView(generics.ListCreateAPIView):
 
 # View to retrieve, update, and delete a task
 class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = [FirebaseAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
 
